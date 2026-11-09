@@ -1,0 +1,23 @@
+# Java / Maven
+**/target/
+*.class
+
+# IntelliJ
+.idea/
+*.iml
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Frontend
+node_modules/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
