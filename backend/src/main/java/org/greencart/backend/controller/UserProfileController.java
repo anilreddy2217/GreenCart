@@ -9,6 +9,7 @@ import org.greencart.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.greencart.backend.dto.ChangePasswordRequest;
 
 @RestController
 @RequestMapping("/api/users")
@@ -40,4 +41,18 @@ public class UserProfileController {
 
         return ResponseEntity.ok(updatedUser);
     }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<Void> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication authentication) {
+
+        userService.changePassword(
+                authentication.getName(),
+                request
+        );
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -23,6 +23,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
+    private final CustomUserDetailsService userDetailsService;
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -43,12 +45,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtService.extractClaims(token);
 
             String email = claims.getSubject();
-            String role = claims.get("role", String.class);
+
+            var userDetails = userDetailsService.loadUserByUsername(email);
 
             var authentication = new UsernamePasswordAuthenticationToken(
-                    email,
+                    userDetails,
                     null,
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                    userDetails.getAuthorities()
             );
 
             SecurityContextHolder.getContext()

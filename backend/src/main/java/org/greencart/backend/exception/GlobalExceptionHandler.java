@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
+import org.greencart.backend.exception.IncorrectCurrentPasswordException;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -92,6 +92,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
+    @ExceptionHandler(IncorrectCurrentPasswordException.class)
+    public ResponseEntity<ErrorResponse> handleIncorrectCurrentPassword(
+            IncorrectCurrentPasswordException exception) {
 
+        return buildResponse(
+                HttpStatus.UNAUTHORIZED,
+                exception.getMessage()
+        );
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponse(
+            HttpStatus status,
+            String message) {
+
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message
+        );
+
+        return ResponseEntity.status(status).body(error);
+    }
 
 }

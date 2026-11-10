@@ -2,16 +2,19 @@ package org.greencart.backend.serviceimpl;
 
 import org.greencart.backend.exception.EmailAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
+import org.greencart.backend.exception.InvalidCredentialsException;
 import org.greencart.backend.exception.UserNotFoundException;
 import org.greencart.backend.dto.RegisterRequest;
 import org.greencart.backend.dto.UpdateProfileRequest;
 import org.greencart.backend.dto.UserResponse;
 import org.greencart.backend.entity.Role;
 import org.greencart.backend.entity.User;
+import org.greencart.backend.exception.IncorrectCurrentPasswordException;
 import org.greencart.backend.repository.UserRepository;
 import org.greencart.backend.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.greencart.backend.dto.ChangePasswordRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -84,5 +87,37 @@ public class UserServiceImpl implements UserService {
                 user.getRole()
         );
     }
+
+    @Override
+    public void changePassword(
+            String email,
+            ChangePasswordRequest request) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UserNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(
+                request.currentPassword(), user.getPassword())) {
+            throw new IncorrectCurrentPasswordException(
+                    "Current password is incorrect");
+        }
+
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new IllegalArgumentException(
+                    "New password and confirmation do not match");
+        }
+
+        if (passwordEncoder.matches(
+                request.newPassword(), user.getPassword())) {
+            throw new IllegalArgumentException(
+                    "New password must be different from current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+
+        userRepository.save(user);
+    }
+
 
 }
